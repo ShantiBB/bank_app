@@ -34,7 +34,6 @@ class AccountDetailSerializer(AccountListSerializer):
             'description',
             'balance',
             'account_type',
-            'status_account',
             'created_at'
         )
 

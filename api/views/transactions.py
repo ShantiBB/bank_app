@@ -7,9 +7,10 @@ from transactions.models import Transaction
 
 class TransactionViewSet(ModelViewSet):
     serializer_class = TransactionCreateSerializer
-    queryset = Transaction.objects.all()
     permission_classes = (CurrentUserOrAdmin,)
     http_method_names = ('get', 'post')
 
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Transaction.objects.filter(initiator=user).select_related('account')
+        return queryset

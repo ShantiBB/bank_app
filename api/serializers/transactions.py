@@ -1,24 +1,13 @@
-from django.db import transaction
 from rest_framework import serializers
 
-from accounts.models import Account
-from core.constants import CURRENCY_CHOICES
+from services.tasks import transaction_task
 from transactions.models import Transaction
-from transactions.services import process_transaction
-from transactions.validators import validate_target_account, validate_balance
+from api.validators import validate_target_account, validate_balance
 
 
 class TransactionCreateSerializer(serializers.ModelSerializer):
-    target_account = serializers.PrimaryKeyRelatedField(
-        queryset=Account.objects.filter(status_account='active'),
-        write_only=True,
-        allow_null=True,
-    )
-    currency = serializers.ChoiceField(
-        source='account.currency',
-        choices=CURRENCY_CHOICES,
-        read_only=True
-    )
+    currency = serializers.CharField(source='account.currency', read_only=True)
+    target_account = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = Transaction
@@ -32,17 +21,25 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, attrs):
-        account = attrs.get('account')
-        target_account = attrs.get('target_account')
-        amount = attrs.get('amount')
         transaction_type = attrs.get('transaction_type')
-
         if transaction_type == 'transfer':
-            validate_target_account(account, target_account)
+            validate_target_account(attrs)
         if transaction_type in ('transfer', 'withdrawal'):
-            validate_balance(account, amount)
+            validate_balance(attrs)
         return attrs
 
     def create(self, validated_data):
-        with transaction.atomic():
-            return process_transaction(validated_data)
+        account = validated_data.get('account')
+        amount = validated_data.get('amount')
+        transaction_type = validated_data.get('transaction_type')
+        initiator = self.context['request'].user
+        target_account_id = validated_data.get('target_account')
+
+        transaction_task.delay_on_commit(
+            initiator_id=initiator.id,
+            account_id=account.id,
+            target_id=target_account_id,
+            amount=amount,
+            transaction_type=transaction_type,
+        )
+        return validated_data
