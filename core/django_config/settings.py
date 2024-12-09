@@ -1,6 +1,6 @@
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = 'django-insecure-rmg!m-16r*o+nk8@zv@kuo)g5iroj4$)&!oy(id=&19$8pxvci'
 
@@ -21,7 +21,6 @@ INSTALLED_APPS = [
 
     'accounts.apps.AccountsConfig',
     'api.apps.ApiConfig',
-    'core.apps.CoreConfig',
     'services.apps.ServicesConfig',
     'transactions.apps.TransactionsConfig',
     'user.apps.UserConfig',
@@ -37,7 +36,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'app.urls'
+ROOT_URLCONF = 'core.django_config.urls'
 
 TEMPLATES = [
     {
@@ -56,7 +55,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'app.wsgi.application'
+WSGI_APPLICATION = 'core.django_config.wsgi.application'
 
 DATABASES = {
     'default': {
@@ -108,3 +107,29 @@ DJOSER = {
         'user_list': ['rest_framework.permissions.AllowAny'],
     }
 }
+
+CELERY_BROKER_URL = 'pyamqp://guest@localhost//'
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'level': 'DEBUG',
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django.db.backends': {
+#             'level': 'DEBUG',
+#             'handlers': ['console'],
+#         },
+#     },
+# }
