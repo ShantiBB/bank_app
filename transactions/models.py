@@ -15,21 +15,14 @@ class Transaction(models.Model):
         verbose_name='Сумма перевода'
     )
     message = models.TextField(
-        null=True,
-        blank=True,
+        null=True, blank=True,
         verbose_name='Сообщение'
     )
     transaction_type = models.CharField(
         max_length=20,
         choices=TRANSACTION_TYPES,
         verbose_name='Тип транзакции',
-        default='transfer_in'
-    )
-    status = models.CharField(
-        max_length=10,
-        choices=TRANSACTION_STATUS_CHOICES,
-        default='pending',
-        verbose_name='Статус перевода'
+        default='transfer_in',
     )
     account = models.ForeignKey(
         Account,
@@ -39,9 +32,7 @@ class Transaction(models.Model):
     )
     initiator = models.ForeignKey(
         get_user_model(),
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
         related_name='transactions',
         verbose_name='Инициатор'
     )
