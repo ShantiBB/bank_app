@@ -118,6 +118,8 @@ CACHES = {
     }
 }
 
+CACHE_TIMEOUT = 3000
+
 CELERY_BROKER_URL = 'pyamqp://guest@localhost//'
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 # CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
