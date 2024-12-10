@@ -11,7 +11,7 @@ def validate_target_account(data):
         raise serializers.ValidationError(
             'Не указан получатель перевода.'
         )
-    if account == target_account:
+    if account.id == target_account:
         raise serializers.ValidationError(
             'Перевод на текущий счет невозможен.'
         )

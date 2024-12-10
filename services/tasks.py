@@ -9,13 +9,17 @@ from services.transactions import (
     transaction_withdrawal,
     transaction_transfer,
 )
+from user.models import CustomUser
 
 User = get_user_model()
 
-@shared_task(bind=True)
+@shared_task(
+    name='transaction_task',
+    autoretry_for=(Exception,),
+    default_retry_delay=30
+)
 @transaction.atomic
 def transaction_task(
-        self,
         initiator_id,
         account_id,
         target_id,
@@ -23,22 +27,22 @@ def transaction_task(
         transaction_type
 ):
     """Фоновая задача для обработки транзакции"""
-    try:
-        account = get_object_or_404(Account, id=account_id)
-        initiator = get_object_or_404(User, id=initiator_id)
-        if transaction_type == 'deposit':
-            transaction_deposit(account, amount)
-        elif transaction_type == 'withdrawal':
-            transaction_withdrawal(account, amount)
-        elif transaction_type == 'transfer':
-            target_account = get_object_or_404(Account, id=target_id)
-            transaction_transfer(account, target_account, amount)
+    account = get_object_or_404(
+        Account.objects.select_related('owner'),
+        id=account_id,
+    )
+    initiator = account.owner
+    if transaction_type == 'deposit':
+        transaction_deposit(account, amount)
+    elif transaction_type == 'withdrawal':
+        transaction_withdrawal(account, amount)
+    elif transaction_type == 'transfer':
+        target_account = get_object_or_404(Account, id=target_id)
+        transaction_transfer(account, target_account, amount)
 
-        Transaction.objects.create(
-            initiator=initiator,
-            account=account,
-            amount=amount,
-            transaction_type=transaction_type,
-        )
-    except Exception as exp:
-        self.retry(exp=exp, countdown=60)
+    Transaction.objects.create(
+        initiator=initiator,
+        account=account,
+        amount=amount,
+        transaction_type=transaction_type,
+    )

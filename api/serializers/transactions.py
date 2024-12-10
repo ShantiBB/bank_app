@@ -29,11 +29,11 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        initiator = self.context['request'].user
         account = validated_data.get('account')
+        target_account_id = validated_data.get('target_account')
         amount = validated_data.get('amount')
         transaction_type = validated_data.get('transaction_type')
-        initiator = self.context['request'].user
-        target_account_id = validated_data.get('target_account')
 
         transaction_task.delay_on_commit(
             initiator_id=initiator.id,
