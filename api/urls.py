@@ -16,7 +16,6 @@ router.register(
     basename='transactions'
 )
 
-
 urlpatterns = [
     path('', include('djoser.urls')),
     path('', include('djoser.urls.authtoken')),

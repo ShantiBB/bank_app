@@ -2,10 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 from accounts.models import Account
-from core.constants import (
-    TRANSACTION_TYPES,
-    TRANSACTION_STATUS_CHOICES
-)
+from core.constants import TRANSACTION_TYPES
 
 
 class Transaction(models.Model):
@@ -17,6 +14,11 @@ class Transaction(models.Model):
     message = models.TextField(
         null=True, blank=True,
         verbose_name='Сообщение'
+    )
+    status_id = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        verbose_name='Статус транзакции'
     )
     transaction_type = models.CharField(
         max_length=20,

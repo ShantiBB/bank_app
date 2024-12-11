@@ -26,7 +26,7 @@ def response_action_method(request, instance, *args, **kwargs):
     return super(*class_calc).retrieve(request, *args, **kwargs)
 
 
-def check_cache(instance, request, cache_key, *args, **kwargs):
+def check_response_cache(instance, request, cache_key, *args, **kwargs):
     cached_object = cache.get(cache_key)
     if cached_object:
         return Response(cached_object, status=status.HTTP_200_OK)
