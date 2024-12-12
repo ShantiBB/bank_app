@@ -53,9 +53,6 @@ def transaction_task(
         )
     sleep(10)  # Симуляция обработки транзакции
 
-    delete_account_cache(account_id, initiator_id)
-    delete_transaction_cache(transaction_obj.id, initiator_id)
-
     if self.request.retries == 3:
         raise MaxRetriesExceededError()
 

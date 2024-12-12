@@ -39,14 +39,3 @@ class AccountViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         account = serializer.save(owner=self.request.user)
-        delete_account_cache(account.id, self.request.user.id)
-
-    def perform_update(self, serializer):
-        account = serializer.save()
-        delete_account_cache(account.id, self.request.user.id)
-
-    def perform_destroy(self, instance):
-        delete_account_cache(instance.id, self.request.user.id)
-        # Для удаления связных транзакций из кэша
-        delete_transaction_cache(None, self.request.user.id)
-        super().perform_destroy(instance)

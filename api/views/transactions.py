@@ -30,7 +30,3 @@ class TransactionViewSet(ModelViewSet):
     def list(self, request, *args, **kwargs):
         cache_key = f'transaction_list_{self.request.user.id}'
         return check_response_cache(self, request, cache_key, *args, **kwargs)
-
-    def perform_destroy(self, instance):
-        delete_transaction_cache(instance.id, self.request.user.id)
-        super().perform_destroy(instance)
