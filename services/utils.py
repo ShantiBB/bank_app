@@ -28,7 +28,7 @@ def response_action_method(request, instance, *args, **kwargs):
 
 def check_response_cache(instance, request, cache_key, *args, **kwargs):
     cached_object = cache.get(cache_key)
-    if cached_object:
+    if cached_object is not None:
         return Response(cached_object, status=status.HTTP_200_OK)
     response = response_action_method(request, instance, *args, **kwargs)
     cache.set(cache_key, response.data, timeout=CACHE_TIMEOUT)
