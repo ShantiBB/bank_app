@@ -7,7 +7,7 @@ from api.serializers import (
     TransactionCreateSerializer,
     TransactionDetailSerializer
 )
-from services.utils import check_response_cache, delete_transaction_cache
+from services.utils import check_response_cache
 
 
 class TransactionViewSet(ModelViewSet):
@@ -15,17 +15,31 @@ class TransactionViewSet(ModelViewSet):
     permission_classes = (CurrentUserOrAdmin,)
     http_method_names = ('get', 'post', 'delete')
 
+    def get_queryset(self):
+        user = self.request.user
+        values = (
+            'id',
+            'amount',
+            'transaction_type',
+            'account__title',
+            'account__currency'
+        )
+        queryset = Transaction.objects.filter(initiator=user)
+
+        if self.action == 'list':
+            queryset = queryset.values(*values)
+        elif self.action == 'retrieve':
+            queryset = queryset.values(
+                *values, 'message', 'created_at', 'status_id'
+            )
+        return queryset
+
     def get_serializer_class(self):
         if self.action == 'list':
             return TransactionListSerializer
         elif self.action == 'retrieve':
             return TransactionDetailSerializer
         return TransactionCreateSerializer
-
-    def get_queryset(self):
-        user = self.request.user
-        queryset = Transaction.objects.filter(initiator=user)
-        return queryset.select_related('account')
 
     def list(self, request, *args, **kwargs):
         cache_key = f'transaction_list_{self.request.user.id}'

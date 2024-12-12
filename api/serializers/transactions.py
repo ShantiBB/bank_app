@@ -6,21 +6,29 @@ from api.validators import validate_target_account, validate_balance
 
 
 class TransactionListSerializer(serializers.ModelSerializer):
-    currency = serializers.CharField(source='account.currency', read_only=True)
+    account = serializers.SerializerMethodField()
+    currency = serializers.SerializerMethodField()
 
     class Meta:
         model = Transaction
         fields = (
             'id',
             'amount',
-            'currency',
             'transaction_type',
-            'account'
+            'account',
+            'currency'
         )
 
+    @staticmethod
+    def get_currency(obj):
+        return obj.get('account__currency')
 
-class TransactionDetailSerializer(serializers.ModelSerializer):
-    currency = serializers.CharField(source='account.currency', read_only=True)
+    @staticmethod
+    def get_account(obj):
+        return obj.get('account__title')
+
+
+class TransactionDetailSerializer(TransactionListSerializer):
     created_at = serializers.DateTimeField(format='%d.%m.%Y %H:%M')
     status = serializers.SerializerMethodField(source='transaction')
 
@@ -30,10 +38,10 @@ class TransactionDetailSerializer(serializers.ModelSerializer):
             'id',
             'status',
             'amount',
-            'currency',
-            'message',
             'transaction_type',
             'account',
+            'currency',
+            'message',
             'created_at'
         )
 
@@ -50,14 +58,12 @@ class TransactionDetailSerializer(serializers.ModelSerializer):
 
 
 class TransactionCreateSerializer(serializers.ModelSerializer):
-    currency = serializers.CharField(source='account.currency', read_only=True)
     target_account = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = Transaction
         fields = (
             'amount',
-            'currency',
             'message',
             'transaction_type',
             'account',

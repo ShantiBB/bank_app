@@ -2,11 +2,7 @@ from rest_framework.viewsets import ModelViewSet
 from djoser.permissions import CurrentUserOrAdmin
 
 from accounts.models import Account
-from services.utils import (
-    delete_account_cache,
-    check_response_cache,
-    delete_transaction_cache
-)
+from services.utils import check_response_cache
 from api.serializers import (
     AccountListSerializer,
     AccountDetailSerializer,
@@ -19,7 +15,17 @@ class AccountViewSet(ModelViewSet):
     http_method_names = ('get', 'post', 'put', 'delete')
 
     def get_queryset(self):
-        return Account.objects.filter(owner=self.request.user)
+        values = ('id', 'title', 'balance', 'currency', 'account_type')
+        queryset = Account.objects.all()
+
+        if self.action == 'list':
+            owner = self.request.user
+            queryset = Account.objects.filter(owner=owner).values(*values)
+        elif self.action == 'retrieve':
+            queryset = Account.objects.values(
+                *values, 'description', 'created_at'
+            )
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'list':

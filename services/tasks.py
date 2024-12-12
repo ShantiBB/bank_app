@@ -59,7 +59,10 @@ def transaction_task(
 
 def transaction_task_status(instance):
     """Получение статуса задачи по ID"""
-    status = AsyncResult(instance.status_id)
+    status_id = instance.get('status_id')
+    if not status_id:
+        return 'Транзакция отсутствует в очереди'
+    status = AsyncResult(status_id)
     info = status.info
 
     if isinstance(info, MaxRetriesExceededError):

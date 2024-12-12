@@ -17,10 +17,13 @@ class AccountListSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_balance(obj):
-        if obj.currency == 'RUB':
-            return f'{obj.balance}р'
-        elif obj.currency == 'USD':
-            return f'${obj.balance}'
+        currency = obj.get('currency')
+        balance = obj.get('balance')
+
+        if currency == 'RUB':
+            return f'{balance}р'
+        elif currency == 'USD':
+            return f'${balance}'
 
 
 class AccountDetailSerializer(AccountListSerializer):
@@ -45,10 +48,12 @@ class AccountCreateSerializer(serializers.ModelSerializer):
         fields = (
             'title',
             'description',
-            'balance',
-            'account_type',
-            'currency'
+            'currency',
+            'account_type'
         )
-        extra_kwargs = {
-            'balance': {'read_only': True},
-        }
+
+
+class AccountShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ('id', 'currency')
